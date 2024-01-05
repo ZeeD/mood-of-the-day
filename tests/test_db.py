@@ -1,18 +1,13 @@
-from datetime import UTC
-from datetime import datetime
 from unittest import TestCase
 
-from moodoftheday.db import Db
-
-
-def dt(day: int) -> datetime:
-    return datetime(2024, 1, day, tzinfo=UTC)
+from moodoftheday.db import db_connection
+from testsupport import dt
 
 
 class TestDb(TestCase):
     def test_empty(self) -> None:
         now = dt(1)
-        with Db(now, ':memory:') as db:
+        with db_connection(':memory:', now) as db:
             db.append('foo', 'bar', 'baz')
             id_, artist, title, youtbe_url = db.new_row()
             self.assertEqual(artist, 'foo')
