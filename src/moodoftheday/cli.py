@@ -1,10 +1,12 @@
 from logging import INFO
 from logging import basicConfig
 from logging import error
+from logging import exception
 from logging import info
 from sys import argv
 
 from .browser import get_youtube_url
+from .db import RowNotFoundError
 from .db import db_connection
 from .mastoclient import publish
 from .web import serve_webui
@@ -13,11 +15,15 @@ from .web import serve_webui
 def cron() -> None:
     # called by cron
     with db_connection() as db:
-        id_, artist, title, youtube_url = db.new_row()
-        msg = f'Mood of the day: {artist} - {title}\n\n{youtube_url}'
-        publish(msg)
-        info('published %s', msg)
-        db.mark_row(id_)
+        try:
+            id_, artist, title, youtube_url = db.new_row()
+        except RowNotFoundError:
+            exception('row not found')
+        else:
+            msg = f'Mood of the day: {artist} - {title}\n\n{youtube_url}'
+            publish(msg)
+            info('published %s', msg)
+            db.mark_row(id_)
 
 
 def webui() -> None:

@@ -42,6 +42,10 @@ def create_schema(connection: Connection) -> None:
     connection.commit()
 
 
+class RowNotFoundError(Exception):
+    ...
+
+
 class Db:
     def __init__(self, now: datetime, connection: Connection) -> None:
         self.now = now
@@ -72,7 +76,7 @@ class Db:
         )
         row = cursor.fetchone()
         if row is None:
-            raise SystemExit
+            raise RowNotFoundError
         (id_, artist, title, youtube_url) = row
         return (id_, artist, title, youtube_url)
 
