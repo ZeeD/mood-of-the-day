@@ -3,21 +3,17 @@ from __future__ import annotations
 from contextlib import contextmanager
 from datetime import UTC
 from datetime import datetime
-from pathlib import Path
 from sqlite3 import PARSE_DECLTYPES
 from sqlite3 import Connection
 from sqlite3 import connect
 from sqlite3 import register_adapter
 from sqlite3 import register_converter
 from typing import TYPE_CHECKING
-from typing import Final
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-
-SQLFN: Final = Path('~/moodoftheday.sqlite').expanduser()
-
+    from .config import Config
 
 register_adapter(datetime, lambda dt: dt.timestamp())
 register_converter(
@@ -121,11 +117,9 @@ class Db:
 
 
 @contextmanager
-def db_connection(
-    sqlfn: Path | str = SQLFN, now: datetime | None = None
-) -> Iterator[Db]:
+def db_connection(config: Config, now: datetime | None = None) -> Iterator[Db]:
     connection = connect(
-        sqlfn, detect_types=PARSE_DECLTYPES, check_same_thread=False
+        config['sqlfn'], detect_types=PARSE_DECLTYPES, check_same_thread=False
     )
     try:
         create_schema(connection)

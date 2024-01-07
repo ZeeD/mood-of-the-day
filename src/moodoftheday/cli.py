@@ -16,7 +16,7 @@ def main() -> None:
 
     name, *args = argv
     if args and args[0] == '--daemon':
-        with db_connection() as db:
+        with db_connection(config) as db:
             start_daemon(db, config)
 
     if len(args) not in (2, 3):

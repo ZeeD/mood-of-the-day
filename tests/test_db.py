@@ -1,13 +1,14 @@
 from unittest import TestCase
 
 from moodoftheday.db import db_connection
+from testsupport import c
 from testsupport import dt
 
 
 class TestDb(TestCase):
     def test_empty(self) -> None:
         now = dt(1)
-        with db_connection(':memory:', now) as db:
+        with db_connection(c(sqlfn=':memory:'), now) as db:
             db.append('foo', 'bar', 'baz')
             id_, artist, title, youtbe_url = db.new_row()
             self.assertEqual(artist, 'foo')

@@ -1,4 +1,5 @@
 /**/*.egg-info
-/.env
 /.mypy_cache/
 /.ruff_cache/
+/mood-of-the-day.env
+/mood-of-the-day.sqlite
