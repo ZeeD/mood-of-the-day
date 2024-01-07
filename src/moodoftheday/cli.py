@@ -1,37 +1,27 @@
 from logging import INFO
 from logging import basicConfig
 from logging import error
-from logging import info
 from sys import argv
 
-from .browser import get_youtube_url
+from .config import get_config
 from .daemon import start_daemon
 from .db import db_connection
-
-
-def daemon() -> None:
-    with db_connection() as db:
-        start_daemon(db)
-
-
-def append(args: list[str]) -> None:
-    if len(args) not in (2, 3):
-        error('usage: "artist" "title"\n   or: --daemon')
-        raise SystemExit(-1)
-
-    artist, title = (arg.capitalize() for arg in args)
-    youtube_url = get_youtube_url(artist, title)
-    with db_connection() as db:
-        db.append(artist, title, youtube_url)
-        info('inserted %s - %s', artist, title)
+from .web import client_append
 
 
 def main() -> None:
     basicConfig(level=INFO, format='%(message)s')
 
-    args = argv[1:]
+    config = get_config()
 
-    if len(args) > 0 and args[0] == '--daemon':
-        return daemon()
+    name, *args = argv
+    if args and args[0] == '--daemon':
+        with db_connection() as db:
+            start_daemon(db, config)
 
-    return append(args)
+    if len(args) not in (2, 3):
+        error('usage: %s "artist" "title"\n   or: --daemon', name)
+        raise SystemExit(-1)
+
+    artist, title = args
+    client_append(config, artist, title)

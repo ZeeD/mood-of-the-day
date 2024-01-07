@@ -7,6 +7,7 @@ from types import MappingProxyType
 from typing import Final
 from typing import ParamSpec
 
+from .config import Config
 from .db import Db
 from .db import RowNotFoundError
 from .mastoclient import publish
@@ -36,25 +37,26 @@ def loop_forever(  # noqa: PLR0913
     step(times)
 
 
-def step(db: Db) -> None:
+def step(db: Db, config: Config) -> None:
     try:
         id_, artist, title, youtube_url = db.new_row()
     except RowNotFoundError:
         exception('row not found')
     else:
         msg = f'Mood of the day: {artist} - {title}\n\n{youtube_url}'
-        publish(msg)
+        publish(config, msg)
         info('published %s', msg)
         db.mark_row(id_)
 
 
 def serve_cron(
     db: Db,
+    config: Config,
     *,
     delay: float = DELAY,
     times: int | None = None,
     blocking: bool = False,
 ) -> None:
     s = scheduler()
-    loop_forever(s, delay, 0, step, (db,), times=times)
+    loop_forever(s, delay, 0, step, (db, config), times=times)
     s.run(blocking=blocking)
