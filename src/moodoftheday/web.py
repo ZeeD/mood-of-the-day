@@ -1,8 +1,9 @@
 from datetime import datetime
 from html import escape
 from http.server import BaseHTTPRequestHandler
-from http.server import HTTPServer
+from http.server import ThreadingHTTPServer
 from typing import ClassVar
+from webbrowser import open
 
 from .db import Db
 
@@ -66,5 +67,8 @@ def request_handler(db: Db) -> type[BaseHTTPRequestHandler]:
     return RequestHandler
 
 
-def serve_webui(db: Db) -> None:
-    HTTPServer(('', 8000), request_handler(db)).serve_forever()
+def serve_webui(db: Db, *, open_browser: bool = False) -> None:
+    httpd = ThreadingHTTPServer(('', 8000), request_handler(db))
+    if open_browser:
+        open('localhost:8000')
+    httpd.serve_forever()

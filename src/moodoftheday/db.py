@@ -53,7 +53,6 @@ class Db:
 
     def append(self, artist: str, title: str, youtube_url: str) -> int | None:
         cursor = self.connection.cursor()
-        # TODO: check duplicates
         cursor.execute(
             """
             insert into moods(artist, title, youtube_url, creation_date)
@@ -125,7 +124,9 @@ class Db:
 def db_connection(
     sqlfn: Path | str = SQLFN, now: datetime | None = None
 ) -> Iterator[Db]:
-    connection = connect(sqlfn, detect_types=PARSE_DECLTYPES)
+    connection = connect(
+        sqlfn, detect_types=PARSE_DECLTYPES, check_same_thread=False
+    )
     try:
         create_schema(connection)
         yield Db(now if now is not None else datetime.now(tz=UTC), connection)
