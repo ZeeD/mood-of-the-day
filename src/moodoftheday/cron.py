@@ -29,10 +29,15 @@ def loop_forever(  # noqa: PLR0913
     times: int | None = None,
 ) -> None:
     def step(times: int | None) -> None:
-        action(*argument, **kwargs)
+        info('step(times: %s)', times)
         if times is not None and times <= 0:
             return
-        s.enter(delay, priority, step, (None if times is None else times - 1,))
+        try:
+            action(*argument, **kwargs)
+        finally:
+            s.enter(
+                delay, priority, step, (None if times is None else times - 1,)
+            )
 
     step(times)
 
@@ -55,8 +60,7 @@ def serve_cron(
     *,
     delay: float = DELAY,
     times: int | None = None,
-    blocking: bool = False,
 ) -> None:
     s = scheduler()
     loop_forever(s, delay, 0, step, (db, config), times=times)
-    s.run(blocking=blocking)
+    s.run(blocking=True)
