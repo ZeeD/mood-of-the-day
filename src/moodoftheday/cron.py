@@ -3,6 +3,7 @@ from datetime import timedelta
 from logging import exception
 from logging import info
 from sched import scheduler
+from time import time
 from types import MappingProxyType
 from typing import Final
 from typing import ParamSpec
@@ -10,6 +11,7 @@ from typing import ParamSpec
 from .config import Config
 from .db import Db
 from .db import RowNotFoundError
+from .dt import get_now
 from .mastoclient import publish
 
 DELAY: Final = timedelta(days=1).total_seconds()
@@ -63,4 +65,21 @@ def serve_cron(
 ) -> None:
     s = scheduler()
     loop_forever(s, delay, 0, step, (db, config), times=times)
+    s.run(blocking=True)
+
+
+def every_day_at_08_00(
+    action: Callable[P, None],
+    argument: P.args = (),
+    kwargs: P.kwargs = MappingProxyType({}),
+    *,
+    timefunc: Callable[[], float] = time,
+) -> None:
+    s = scheduler(timefunc=timefunc)
+    now = get_now()
+    today_at_08_00 = now.replace(hour=8, minute=0, second=0, microsecond=0)
+    next_time = today_at_08_00
+    while next_time < now:
+        next_time += timedelta(days=1)
+    s.enterabs(next_time.timestamp(), 0, action, argument, kwargs)
     s.run(blocking=True)

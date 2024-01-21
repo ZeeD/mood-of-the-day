@@ -8,13 +8,13 @@ from testsupport import dt
 class TestDb(TestCase):
     def test_empty(self) -> None:
         now = dt(1)
-        with db_connection(c(sqlfn=':memory:'), now) as db:
-            db.append('foo', 'bar', 'baz')
+        with db_connection(c(sqlfn=':memory:')) as db:
+            db.append('foo', 'bar', 'baz', now)
             id_, artist, title, youtbe_url = db.new_row()
             self.assertEqual(artist, 'foo')
             self.assertEqual(title, 'bar')
             self.assertEqual(youtbe_url, 'baz')
-            db.mark_row(id_)
+            db.mark_row(id_, now)
 
             cursor = db.connection.cursor()
             cursor.execute(

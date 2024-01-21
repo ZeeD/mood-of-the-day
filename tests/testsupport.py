@@ -1,11 +1,11 @@
-from datetime import UTC
 from datetime import datetime
 
 from moodoftheday.config import Config
+from moodoftheday.dt import TZ
 
 
 def dt(day: int) -> datetime:
-    return datetime(2024, 1, day, tzinfo=UTC)
+    return datetime(2024, 1, day, tzinfo=TZ)
 
 
 def c(  # noqa: PLR0913

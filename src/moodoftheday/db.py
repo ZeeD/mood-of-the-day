@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-from datetime import UTC
 from datetime import datetime
 from sqlite3 import PARSE_DECLTYPES
 from sqlite3 import Connection
@@ -10,15 +9,16 @@ from sqlite3 import register_adapter
 from sqlite3 import register_converter
 from typing import TYPE_CHECKING
 
+from .dt import from_timestamp
+from .dt import get_now
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from .config import Config
 
 register_adapter(datetime, lambda dt: dt.timestamp())
-register_converter(
-    'timestamp', lambda ts: datetime.fromtimestamp(float(ts), tz=UTC)
-)
+register_converter('timestamp', lambda ts: from_timestamp(float(ts)))
 
 
 def create_schema(connection: Connection) -> None:
@@ -43,18 +43,23 @@ class RowNotFoundError(Exception):
 
 
 class Db:
-    def __init__(self, now: datetime, connection: Connection) -> None:
-        self.now = now
+    def __init__(self, connection: Connection) -> None:
         self.connection = connection
 
-    def append(self, artist: str, title: str, youtube_url: str) -> int | None:
+    def append(
+        self,
+        artist: str,
+        title: str,
+        youtube_url: str,
+        now: datetime | None = None,
+    ) -> int | None:
         cursor = self.connection.cursor()
         cursor.execute(
             """
             insert into moods(artist, title, youtube_url, creation_date)
             values (?,?,?,?)
             """,
-            (artist, title, youtube_url, self.now),
+            (artist, title, youtube_url, get_now(now)),
         )
         self.connection.commit()
         return cursor.lastrowid
@@ -75,14 +80,14 @@ class Db:
         (id_, artist, title, youtube_url) = row
         return (id_, artist, title, youtube_url)
 
-    def mark_row(self, id_: int) -> None:
+    def mark_row(self, id_: int, now: datetime | None = None) -> None:
         cursor = self.connection.cursor()
         cursor.execute(
             """
             update moods set published_date=?
             where id=?
             """,
-            (self.now, id_),
+            (get_now(now), id_),
         )
         self.connection.commit()
 
@@ -117,12 +122,12 @@ class Db:
 
 
 @contextmanager
-def db_connection(config: Config, now: datetime | None = None) -> Iterator[Db]:
+def db_connection(config: Config) -> Iterator[Db]:
     connection = connect(
         config['sqlfn'], detect_types=PARSE_DECLTYPES, check_same_thread=False
     )
     try:
         create_schema(connection)
-        yield Db(now if now is not None else datetime.now(tz=UTC), connection)
+        yield Db(connection)
     finally:
         connection.close()
