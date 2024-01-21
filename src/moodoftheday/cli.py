@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from logging import INFO
 from logging import basicConfig
 from logging import error

@@ -2,29 +2,31 @@ from __future__ import annotations
 
 from datetime import datetime
 from datetime import timedelta
-from logging import INFO
-from logging import basicConfig
 from logging import exception
 from logging import info
 from sched import scheduler
 from time import time
+from typing import TYPE_CHECKING
 from typing import Any
-from typing import Callable
-from typing import Mapping
 
-from zoneinfo import ZoneInfo
+from .db import RowNotFoundError
+from .dt import TZ
+from .mastoclient import publish
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from collections.abc import Mapping
 
-def action(*args: Any, **kwargs: Any) -> None:
-    info('action(%s, %s)', args, kwargs)
+    from .config import Config
+    from .db import Db
 
 
 class Cron(scheduler):
     def __init__(
         self,
         action: Callable[..., None],
-        args: tuple[Any, ...],
-        kwargs: dict[str, Any],
+        args: tuple[Any, ...] = (),
+        kwargs: Mapping[str, Any] = {},
     ) -> None:
         super().__init__(timefunc=time)
         self.action = action
@@ -57,7 +59,7 @@ class Cron(scheduler):
             try:
                 self.action(*self.args, **self.kwargs)
             except Exception:
-                exception('')
+                exception('exception in action')
 
         self.enterabs(
             self._next(replace_kwargs, timedelta_kwargs),
@@ -72,25 +74,24 @@ class Cron(scheduler):
         replace_kwargs: Mapping[str, Any],
         timedelta_kwargs: Mapping[str, float],
     ) -> float:
-        now = datetime.fromtimestamp(self.timefunc(), ZoneInfo('Europe/Rome'))
+        now = datetime.fromtimestamp(self.timefunc(), TZ)
         dt = now.replace(**replace_kwargs)  # today, at 08:00
         while dt <= now:
             dt += timedelta(**timedelta_kwargs)
         return dt.timestamp()
 
 
-def main() -> None:
-    basicConfig(level=INFO, format='%(asctime)s\n\t%(message)s')
-    Cron(action, ('foo', 'bar'), {'baz': 'qux'}).run_forever(
-        replace_kwargs={
-            'hour': 12,
-            'minute': 33,
-            'second': 0,
-            'microsecond': 0,
-        },
-        timedelta_kwargs={'seconds': 3.0},
-    )
+def _serve_cron_step(db: Db, config: Config) -> None:
+    try:
+        id_, artist, title, youtube_url = db.new_row()
+    except RowNotFoundError:
+        exception('row not found')
+    else:
+        msg = f'Mood of the day: {artist} - {title}\n\n{youtube_url}'
+        publish(config, msg)
+        info('published %s', msg)
+        db.mark_row(id_)
 
 
-if __name__ == '__main__':
-    main()
+def serve_cron(db: Db, config: Config) -> None:
+    Cron(_serve_cron_step, (db, config)).run_forever()

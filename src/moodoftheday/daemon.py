@@ -1,9 +1,14 @@
-from concurrent.futures import ThreadPoolExecutor
+from __future__ import annotations
 
-from .config import Config
+from concurrent.futures import ThreadPoolExecutor
+from typing import TYPE_CHECKING
+
 from .cron import serve_cron
-from .db import Db
 from .web import serve_webui
+
+if TYPE_CHECKING:
+    from .config import Config
+    from .db import Db
 
 
 def start_daemon(db: Db, config: Config) -> None:

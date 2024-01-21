@@ -1,4 +1,5 @@
-from datetime import datetime
+from __future__ import annotations
+
 from html import escape
 from http.server import BaseHTTPRequestHandler
 from http.server import ThreadingHTTPServer
@@ -7,6 +8,7 @@ from json import dumps
 from json import loads
 from logging import exception
 from logging import info
+from typing import TYPE_CHECKING
 from typing import ClassVar
 from typing import cast
 from urllib.request import Request
@@ -14,8 +16,12 @@ from urllib.request import urlopen
 from webbrowser import open
 
 from .browser import get_youtube_url
-from .config import Config
-from .db import Db
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from .config import Config
+    from .db import Db
 
 HTML = """<!DOCTYPE html>
 <html>

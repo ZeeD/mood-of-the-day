@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 from logging import info
+from typing import TYPE_CHECKING
 
 from mastodon import Mastodon
 
-from .config import Config
+if TYPE_CHECKING:
+    from .config import Config
 
 
 def publish(config: Config, msg: str) -> None:
