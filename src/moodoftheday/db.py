@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from contextlib import contextmanager
 from datetime import datetime
 from sqlite3 import PARSE_DECLTYPES
@@ -38,8 +36,7 @@ def create_schema(connection: Connection) -> None:
     connection.commit()
 
 
-class RowNotFoundError(Exception):
-    ...
+class RowNotFoundError(Exception): ...
 
 
 class Db:
@@ -93,7 +90,7 @@ class Db:
 
     def all_rows(
         self,
-    ) -> Iterator[tuple[int, str, str, str, datetime, datetime]]:
+    ) -> 'Iterator[tuple[int, str, str, str, datetime, datetime]]':
         cursor = self.connection.cursor()
         cursor.execute(
             """
@@ -103,14 +100,9 @@ class Db:
             """
         )
         for row in cursor.fetchall():
-            (
-                id_,
-                artist,
-                title,
-                youtube_url,
-                creation_date,
-                published_date,
-            ) = row
+            (id_, artist, title, youtube_url, creation_date, published_date) = (
+                row
+            )
             yield (
                 id_,
                 artist,
@@ -122,7 +114,7 @@ class Db:
 
 
 @contextmanager
-def db_connection(config: Config) -> Iterator[Db]:
+def db_connection(config: 'Config') -> 'Iterator[Db]':
     connection = connect(
         config['sqlfn'], detect_types=PARSE_DECLTYPES, check_same_thread=False
     )

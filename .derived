@@ -3,11 +3,14 @@
 /.git/
 /.mypy_cache/
 /.pdm-build/
+/pdm.lock
 /.pdm-python
+/.project
+/.pydevproject
 /.ruff_cache/
+/.settings/
 /.venv/
 
 /*/*.egg-info/
 
-/*.env
 /*.sqlite

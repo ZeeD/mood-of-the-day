@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from urllib.parse import parse_qs
 from urllib.parse import quote_plus
 from urllib.parse import urlsplit

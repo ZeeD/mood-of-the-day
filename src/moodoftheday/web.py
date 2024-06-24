@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from html import escape
 from http.server import BaseHTTPRequestHandler
 from http.server import ThreadingHTTPServer
@@ -51,7 +49,7 @@ HTML = """<!DOCTYPE html>
 """
 
 
-def html(row: tuple[int, str, str, str, datetime, datetime]) -> str:
+def html(row: tuple[int, str, str, str, 'datetime', 'datetime']) -> str:
     (id_, artist, title, youtube_url, creation_date, published_date) = row
     return f"""\
                 <tr>
@@ -64,7 +62,7 @@ def html(row: tuple[int, str, str, str, datetime, datetime]) -> str:
                 </tr>"""
 
 
-def request_handler(db: Db) -> type[BaseHTTPRequestHandler]:
+def request_handler(db: 'Db') -> type[BaseHTTPRequestHandler]:
     def read(rfile: BufferedIOBase, size: int = 1024) -> str:
         chunks: bytes = b''
         while True:
@@ -75,7 +73,7 @@ def request_handler(db: Db) -> type[BaseHTTPRequestHandler]:
         return chunks.decode()
 
     class RequestHandler(BaseHTTPRequestHandler):
-        db: ClassVar[Db]
+        db: ClassVar['Db']
 
         def do_GET(self) -> None:  # noqa: N802
             self.log_message('GET')
@@ -114,14 +112,14 @@ def request_handler(db: Db) -> type[BaseHTTPRequestHandler]:
     return RequestHandler
 
 
-def serve_webui(db: Db, *, open_browser: bool = False) -> None:
+def serve_webui(db: 'Db', *, open_browser: bool = False) -> None:
     httpd = ThreadingHTTPServer(('', 8000), request_handler(db))
     if open_browser:
         open('localhost:8000')
     httpd.serve_forever()
 
 
-def client_append(config: Config, artist: str, title: str) -> None:
+def client_append(config: 'Config', artist: str, title: str) -> None:
     youtube_url = get_youtube_url(artist, title)
     response = urlopen(
         Request(

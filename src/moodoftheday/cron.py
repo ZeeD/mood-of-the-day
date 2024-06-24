@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from datetime import datetime
 from datetime import timedelta
 from logging import exception
@@ -9,6 +7,7 @@ from time import time
 from typing import TYPE_CHECKING
 from typing import Any
 
+from .db import Db
 from .db import RowNotFoundError
 from .dt import TZ
 from .mastoclient import publish
@@ -18,16 +17,17 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from .config import Config
-    from .db import Db
 
 
 class Cron(scheduler):
     def __init__(
         self,
-        action: Callable[..., None],
+        action: 'Callable[..., None]',
         args: tuple[Any, ...] = (),
-        kwargs: Mapping[str, Any] = {},
+        kwargs: 'Mapping[str, Any] | None' = None,
     ) -> None:
+        if kwargs is None:
+            kwargs = {}
         super().__init__(timefunc=time)
         self.action = action
         self.args = args
@@ -37,21 +37,25 @@ class Cron(scheduler):
         self,
         /,
         *,
-        replace_kwargs: Mapping[str, Any] = {
-            'hour': 8,
-            'minute': 0,
-            'second': 0,
-            'microsecond': 0,
-        },
-        timedelta_kwargs: Mapping[str, float] = {'days': 1.0},
+        replace_kwargs: 'Mapping[str, Any] | None' = None,
+        timedelta_kwargs: 'Mapping[str, float] | None' = None,
     ) -> None:
+        if timedelta_kwargs is None:
+            timedelta_kwargs = {'days': 1.0}
+        if replace_kwargs is None:
+            replace_kwargs = {
+                'hour': 8,
+                'minute': 0,
+                'second': 0,
+                'microsecond': 0,
+            }
         self._step(replace_kwargs, timedelta_kwargs, first_time=True)
         super().run(blocking=True)
 
     def _step(
         self,
-        replace_kwargs: Mapping[str, Any],
-        timedelta_kwargs: Mapping[str, float],
+        replace_kwargs: 'Mapping[str, Any]',
+        timedelta_kwargs: 'Mapping[str, float]',
         *,
         first_time: bool,
     ) -> None:
@@ -71,8 +75,8 @@ class Cron(scheduler):
 
     def _next(
         self,
-        replace_kwargs: Mapping[str, Any],
-        timedelta_kwargs: Mapping[str, float],
+        replace_kwargs: 'Mapping[str, Any]',
+        timedelta_kwargs: 'Mapping[str, float]',
     ) -> float:
         now = datetime.fromtimestamp(self.timefunc(), TZ)
         dt = now.replace(**replace_kwargs)  # today, at 08:00
@@ -81,7 +85,7 @@ class Cron(scheduler):
         return dt.timestamp()
 
 
-def _serve_cron_step(db: Db, config: Config) -> None:
+def _serve_cron_step(db: Db, config: 'Config') -> None:
     try:
         id_, artist, title, youtube_url = db.new_row()
     except RowNotFoundError:
@@ -93,5 +97,5 @@ def _serve_cron_step(db: Db, config: Config) -> None:
         db.mark_row(id_)
 
 
-def serve_cron(db: Db, config: Config) -> None:
+def serve_cron(db: Db, config: 'Config') -> None:
     Cron(_serve_cron_step, (db, config)).run_forever()

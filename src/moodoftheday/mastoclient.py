@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from logging import info
 from typing import TYPE_CHECKING
 
@@ -9,7 +7,7 @@ if TYPE_CHECKING:
     from .config import Config
 
 
-def publish(config: Config, msg: str) -> None:
+def publish(config: 'Config', msg: str) -> None:
     info('publish(%s, %s)', config, msg)
     client_id = config['client_id']
     client_secret = config['client_secret']

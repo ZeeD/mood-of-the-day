@@ -1,9 +1,9 @@
 from datetime import timedelta
 from logging import INFO
 from logging import basicConfig
+from logging import info
 from typing import Final
 from unittest import TestCase
-from logging import info
 
 from moodoftheday.cron import Cron
 
@@ -17,7 +17,8 @@ class Step:
         self.i += 5
         info('call - i=%s', self.i)
         if self.i > 12:
-            raise Exception('bum')
+            msg = 'bum'
+            raise Exception(msg)
 
 
 DELAY: Final = timedelta(seconds=2).total_seconds()
