@@ -15,7 +15,8 @@ class Config(TypedDict):
 
 
 def defined(value: str | None) -> str:
-    assert value is not None
+    if value is None:
+        raise TypeError
     return value
 
 

@@ -87,7 +87,7 @@ lint = { composite = [
     "dmypy run .",
 ]}
 tests = { composite = [
-    "coverage run -m unittest discover --verbose --locals --failfast --catch --start-directory tests --top-level-directory src",
+    "coverage run -m unittest discover --verbose --locals --failfast --catch --start-directory tests",
     "coverage report",
     "coverage erase"
 ]}

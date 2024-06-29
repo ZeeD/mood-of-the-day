@@ -51,15 +51,14 @@ HTML = """<!DOCTYPE html>
 
 def html(row: tuple[int, str, str, str, 'datetime', 'datetime']) -> str:
     (id_, artist, title, youtube_url, creation_date, published_date) = row
-    return f"""\
-                <tr>
-                    <td>{id_}</td>
-                    <td>{escape(artist)}</td>
-                    <td>{escape(title)}</td>
-                    <td><a href="{escape(youtube_url)}">{escape(youtube_url)}</a></td>
-                    <td>{creation_date}</td>
-                    <td>{published_date}</td>
-                </tr>"""
+    return f"""<tr>
+        <td>{id_}</td>
+        <td>{escape(artist)}</td>
+        <td>{escape(title)}</td>
+        <td><a href="{escape(youtube_url)}">{escape(youtube_url)}</a></td>
+        <td>{creation_date}</td>
+        <td>{published_date}</td>
+    </tr>"""
 
 
 def request_handler(db: 'Db') -> type[BaseHTTPRequestHandler]:
@@ -120,15 +119,14 @@ def serve_webui(db: 'Db', *, open_browser: bool = False) -> None:
 
 
 def client_append(config: 'Config', artist: str, title: str) -> None:
-    youtube_url = get_youtube_url(artist, title)
-    response = urlopen(
-        Request(
+    response = urlopen(  # noqa: S310
+        Request(  # noqa: S310
             config['server_origin'],
             data=dumps(
                 {
                     'artist': artist.title(),
                     'title': title.capitalize(),
-                    'youtube_url': youtube_url,
+                    'youtube_url': get_youtube_url(artist, title),
                 }
             ).encode(),
             method='POST',

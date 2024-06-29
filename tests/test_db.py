@@ -1,8 +1,8 @@
 from unittest import TestCase
 
+from _support.factories import c
+from _support.factories import dt
 from moodoftheday.db import db_connection
-from testsupport import c
-from testsupport import dt
 
 
 class TestDb(TestCase):

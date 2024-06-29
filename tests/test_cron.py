@@ -8,17 +8,21 @@ from unittest import TestCase
 from moodoftheday.cron import Cron
 
 
+class StepError(Exception): ...
+
+
 class Step:
-    def __init__(self) -> None:
+    def __init__(self, min_i: int) -> None:
         self.i = 0
-        info('init - i=%s', self.i)
+        self.min_i = min_i
+        info('init - i=%s, min_i=%s', self.i, self.min_i)
 
     def __call__(self) -> None:
         self.i += 5
         info('call - i=%s', self.i)
-        if self.i > 12:
+        if self.i > self.min_i:
             msg = 'bum'
-            raise Exception(msg)
+            raise StepError(msg)
 
 
 DELAY: Final = timedelta(seconds=2).total_seconds()
@@ -30,7 +34,7 @@ class TestCron(TestCase):
         basicConfig(level=INFO)
 
     def test_run_forever(self) -> None:
-        step = Step()
+        step = Step(12)
         Cron(step).run_forever(
             replace_kwargs={
                 'hour': 11,
