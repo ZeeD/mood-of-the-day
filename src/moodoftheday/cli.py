@@ -3,10 +3,10 @@ from logging import basicConfig
 from logging import error
 from sys import argv
 
-from .config import get_config
-from .daemon import start_daemon
-from .db import db_connection
-from .web import client_append
+from moodoftheday.config import get_config
+from moodoftheday.daemon import start_daemon
+from moodoftheday.db import db_connection
+from moodoftheday.web import client_append
 
 
 def main() -> None:

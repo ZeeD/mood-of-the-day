@@ -7,16 +7,16 @@ from time import time
 from typing import TYPE_CHECKING
 from typing import Any
 
-from .db import Db
-from .db import RowNotFoundError
-from .dt import TZ
-from .mastoclient import publish
+from moodoftheday.db import Db
+from moodoftheday.db import RowNotFoundError
+from moodoftheday.dt import TZ
+from moodoftheday.mastoclient import publish
 
 if TYPE_CHECKING:
     from collections.abc import Callable
     from collections.abc import Mapping
 
-    from .config import Config
+    from moodoftheday.config import Config
 
 
 class Cron(scheduler):

@@ -13,13 +13,13 @@ from urllib.request import Request
 from urllib.request import urlopen
 from webbrowser import open
 
-from .browser import get_youtube_url
+from moodoftheday.browser import get_youtube_url
 
 if TYPE_CHECKING:
     from datetime import datetime
 
-    from .config import Config
-    from .db import Db
+    from moodoftheday.config import Config
+    from moodoftheday.db import Db
 
 HTML = """<!DOCTYPE html>
 <html>

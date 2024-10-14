@@ -7,13 +7,13 @@ from sqlite3 import register_adapter
 from sqlite3 import register_converter
 from typing import TYPE_CHECKING
 
-from .dt import from_timestamp
-from .dt import get_now
+from moodoftheday.dt import from_timestamp
+from moodoftheday.dt import get_now
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from .config import Config
+    from moodoftheday.config import Config
 
 register_adapter(datetime, lambda dt: dt.timestamp())
 register_converter('timestamp', lambda ts: from_timestamp(float(ts)))
