@@ -74,7 +74,7 @@ def request_handler(db: 'Db') -> type[BaseHTTPRequestHandler]:
     class RequestHandler(BaseHTTPRequestHandler):
         db: ClassVar['Db']
 
-        def do_GET(self) -> None:  # noqa: N802
+        def do_GET(self) -> None:
             self.log_message('GET')
             self.log_request(200)
             self.send_response(200)
@@ -86,10 +86,10 @@ def request_handler(db: 'Db') -> type[BaseHTTPRequestHandler]:
             )
             self.wfile.flush()
 
-        def do_POST(self) -> None:  # noqa: N802
+        def do_POST(self) -> None:
             self.log_message('POST')
             try:
-                data = loads(read(cast(BufferedIOBase, self.rfile)))
+                data = loads(read(cast('BufferedIOBase', self.rfile)))
                 artist = data['artist']
                 title = data['title']
                 youtube_url = data['youtube_url']
